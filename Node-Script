@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# Exit immediately if a command exits with a non-zero status
+set -e
+
+echo "==========================================="
+echo " Starting Node.js and PM2 Setup Script"
+echo "==========================================="
+
+# 1. Update system packages
+echo "--> Updating system packages..."
+sudo apt-get update -y && sudo apt-get upgrade -y
+
+# 2. Install NodeSource repository for latest Node.js LTS (e.g., Node 20)
+echo "--> Configuring NodeSource repository..."
+sudo apt-get install -y curl crun g++ make
+curl -fsSL https://nodesource.com | sudo -E bash -
+
+# 3. Install Node.js and Build Essentials
+echo "--> Installing Node.js and development utilities..."
+sudo apt-get install -y nodejs build-essential
+
+# Verify core component versions
+echo "Installed Node version: $(node -v)"
+echo "Installed NPM version:  $(npm -v)"
+
+# 4. Install PM2 globally via NPM
+echo "--> Installing PM2 globally..."
+sudo npm install pm2@latest -g
+
+# Verify PM2 version
+echo "Installed PM2 version: $(pm2 -v)"
+
+# 5. Configure PM2 to run on system startup
+echo "--> Configuring PM2 startup daemon..."
+# This generates and automatically executes the systemd environment block for the current user
+STARTUP_CMD=$(pm2 startup | tail -n 1)
+eval "$STARTUP_CMD"
+
+echo "==========================================="
+echo " Setup Complete! PM2 is ready."
+echo "==========================================="
+echo "To deploy an app, navigate to its folder and run:"
+echo "  pm2 start server.js --name 'my-app'"
+echo "  pm2 save"
+echo "==========================================="
